@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Athyab Anjath Creator – Book a Service</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // ── PASTE YOUR FIREBASE CONFIG HERE ──
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+  window.__db  = db;
+  window.__col = collection(db, "bookings");
+  window.__addDoc = addDoc;
+  window.__serverTimestamp = serverTimestamp;
+  window.__firebaseReady = true;
+</script>
+
+<style>
+:root{
+  --navy:#020c2e;
+  --navy2:#041240;
+  --card:#071852;
+  --cyan:#00e5ff;
+  --cyan2:#00b4cc;
+  --cyan-glow:rgba(0,229,255,.18);
+  --white:#e8f8ff;
+  --muted:rgba(0,229,255,.5);
+  --danger:#ff4d6d;
+  --success:#00ffb3;
+  --font:'Montserrat',sans-serif;
+  --r:12px;
+  --t:.28s cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--navy);
+  color:var(--white);
+  font-family:var(--font);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -5%,rgba(0,90,200,.4) 0%,transparent 65%),
+    radial-gradient(ellipse 50% 50% at 105% 85%,rgba(0,50,160,.25) 0%,transparent 65%),
+    radial-gradient(ellipse 40% 40% at -5% 55%,rgba(0,70,180,.2) 0%,transparent 65%);
+  z-index:0;pointer-events:none;
+}
+
+/* particles */
+.pts{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.pt{position:absolute;border-radius:50%;background:var(--cyan);opacity:0;animation:ptfloat linear infinite}
+@keyframes ptfloat{
+  0%{transform:translateY(105vh) scale(0);opacity:0}
+  8%{opacity:.35}90%{opacity:.15}
+  100%{transform:translateY(-8vh) scale(1.1);opacity:0}
+}
+
+.wrap{position:relative;z-index:1;max-width:820px;margin:0 auto;padding:0 18px 80px}
+
+/* ── HEADER ── */
+header{text-align:center;padding:52px 0 32px}
+.first-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(0,229,255,.07);
+  border:1px solid rgba(0,229,255,.22);
+  border-radius:100px;
+  padding:7px 20px;
+  font-size:.62rem;font-weight:700;letter-spacing:.22em;
+  color:var(--cyan);text-transform:uppercase;
+  margin-bottom:24px;
+  animation:pulseborder 2.8s ease-in-out infinite;
+}
+@keyframes pulseborder{
+  0%,100%{box-shadow:0 0 0 0 rgba(0,229,255,.3)}
+  50%{box-shadow:0 0 0 10px rgba(0,229,255,0)}
+}
+.logo{
+  font-size:clamp(2rem,7vw,3.6rem);
+  font-weight:900;letter-spacing:.1em;
+  background:linear-gradient(135deg,#fff 15%,var(--cyan) 55%,#90f7ff 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  line-height:1.05;
+}
+.logo-sub{
+  font-size:clamp(.58rem,2vw,.78rem);font-weight:700;
+  letter-spacing:.5em;color:var(--cyan2);margin-top:5px;
+}
+.tagline{margin-top:13px;font-size:.75rem;font-weight:500;letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
+.divider{width:100px;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);margin:26px auto;position:relative}
+.divider::after{content:'◆';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:var(--cyan);font-size:.45rem;background:var(--navy);padding:0 5px}
+
+/* ── STEPS ── */
+.steps{display:flex;justify-content:center;align-items:center;margin-bottom:34px}
+.si{display:flex;flex-direction:column;align-items:center;flex:1;max-width:110px}
+.sc{
+  width:36px;height:36px;border-radius:50%;
+  border:2px solid rgba(0,229,255,.25);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.65rem;font-weight:800;color:var(--muted);
+  background:var(--card);transition:var(--t);position:relative;z-index:1;
+}
+.sl{font-size:.58rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:6px;text-align:center;transition:var(--t)}
+.scon{flex:1;height:1px;background:rgba(0,229,255,.12);margin-top:-22px;max-width:55px}
+.si.active .sc{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 18px rgba(0,229,255,.45),0 0 6px rgba(0,229,255,.5) inset}
+.si.active .sl{color:var(--cyan)}
+.si.done .sc{background:var(--cyan);color:var(--navy);border-color:var(--cyan);box-shadow:0 0 14px rgba(0,229,255,.5)}
+.si.done .sl{color:var(--cyan2)}
+
+/* ── CARD ── */
+.card{
+  background:linear-gradient(150deg,var(--card),rgba(3,10,40,.92));
+  border:1px solid rgba(0,229,255,.13);
+  border-radius:var(--r);
+  padding:34px 30px;
+  box-shadow:0 10px 60px rgba(0,0,0,.55),0 0 0 1px rgba(0,229,255,.04) inset;
+  position:relative;overflow:hidden;
+  animation:fadeUp .45s ease both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.55}
+.ct{font-size:1rem;font-weight:800;letter-spacing:.08em;color:var(--cyan);margin-bottom:5px;text-transform:uppercase}
+.cd{font-size:.75rem;font-weight:400;color:var(--muted);letter-spacing:.04em;margin-bottom:26px}
+
+/* ── SERVICE CARDS ── */
+.svc-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(max-width:480px){.svc-grid{grid-template-columns:1fr}}
+.svc{
+  border:1.5px solid rgba(0,229,255,.16);border-radius:10px;
+  padding:18px 15px;cursor:pointer;transition:var(--t);
+  background:rgba(0,229,255,.02);position:relative;overflow:hidden;
+}
+.svc::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(0,229,255,.09),transparent 70%);opacity:0;transition:var(--t)}
+.svc:hover{border-color:var(--cyan2);transform:translateY(-2px)}
+.svc:hover::after,.svc.sel::after{opacity:1}
+.svc.sel{border-color:var(--cyan);background:rgba(0,229,255,.09);box-shadow:0 0 20px rgba(0,229,255,.18)}
+.svc-chk{position:absolute;top:10px;right:10px;width:17px;height:17px;border-radius:50%;border:1.5px solid rgba(0,229,255,.28);display:flex;align-items:center;justify-content:center;font-size:.6rem;color:transparent;transition:var(--t)}
+.svc.sel .svc-chk{background:var(--cyan);border-color:var(--cyan);color:var(--navy)}
+.svc-ico{font-size:1.5rem;margin-bottom:9px}
+.svc-name{font-size:.78rem;font-weight:800;letter-spacing:.06em;color:var(--white);margin-bottom:3px;text-transform:uppercase}
+.svc-price{font-size:.68rem;font-weight:500;color:var(--muted)}
+
+/* ── ADDONS ── */
+.addon-list{display:flex;flex-direction:column;gap:9px}
+.addon{
+  display:flex;align-items:center;gap:13px;
+  border:1px solid rgba(0,229,255,.13);border-radius:9px;
+  padding:13px 15px;cursor:pointer;transition:var(--t);
+  background:rgba(0,229,255,.02);
+}
+.addon:hover{border-color:rgba(0,229,255,.32)}
+.addon.sel{border-color:var(--cyan);background:rgba(0,229,255,.07)}
+.addon-box{width:19px;height:19px;border-radius:4px;border:1.5px solid rgba(0,229,255,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:var(--t);font-size:.7rem}
+.addon.sel .addon-box{background:var(--cyan);border-color:var(--cyan);color:var(--navy)}
+.addon-info{flex:1}
+.addon-name{font-size:.8rem;font-weight:700;color:var(--white)}
+.addon-desc{font-size:.68rem;font-weight:400;color:var(--muted);margin-top:2px}
+.addon-price{font-size:.78rem;font-weight:800;color:var(--cyan)}
+
+/* ── DURATION ── */
+.dur-wrap{display:flex;flex-wrap:wrap;gap:9px}
+.dur{background:rgba(0,229,255,.03);border:1px solid rgba(0,229,255,.16);border-radius:8px;padding:10px 18px;color:var(--muted);font-family:var(--font);font-size:.78rem;font-weight:600;cursor:pointer;transition:var(--t)}
+.dur:hover{border-color:var(--cyan2);color:var(--white)}
+.dur.sel{border-color:var(--cyan);color:var(--cyan);background:rgba(0,229,255,.1);box-shadow:0 0 12px rgba(0,229,255,.14)}
+
+/* ── FORM ── */
+.fg{margin-bottom:20px}
+label{display:block;font-size:.67rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+label .req{color:var(--cyan)}
+input[type=text],input[type=email],input[type=tel],input[type=date],select,textarea{
+  width:100%;background:rgba(0,229,255,.04);
+  border:1px solid rgba(0,229,255,.18);border-radius:8px;
+  color:var(--white);font-family:var(--font);font-size:.88rem;font-weight:500;
+  padding:13px 15px;outline:none;transition:var(--t);-webkit-appearance:none;
+}
+input::placeholder,textarea::placeholder{color:rgba(0,229,255,.22)}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--cyan);background:rgba(0,229,255,.08);
+  box-shadow:0 0 0 3px rgba(0,229,255,.1);
+}
+select option{background:var(--navy2)}
+textarea{resize:vertical;min-height:95px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+@media(max-width:520px){.frow{grid-template-columns:1fr}}
+.err-txt{font-size:.68rem;color:var(--danger);margin-top:5px;display:none}
+.fg.has-err input,.fg.has-err select,.fg.has-err textarea{border-color:var(--danger)}
+.fg.has-err .err-txt{display:block}
+
+/* ── SLIDER ── */
+.slider-wrap{padding:6px 0 26px;position:relative}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;background:rgba(0,229,255,.15);border-radius:2px;outline:none;border:none;padding:0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px rgba(0,229,255,.55);cursor:pointer;transition:var(--t)}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);box-shadow:0 0 20px rgba(0,229,255,.75)}
+.slider-labels{display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);position:absolute;bottom:0;left:0;right:0}
+.slider-val{text-align:center;font-size:.82rem;font-weight:800;color:var(--cyan);margin-top:8px}
+
+/* ── QUOTE BOX ── */
+.qbox{
+  background:linear-gradient(145deg,rgba(0,229,255,.06),rgba(0,40,100,.22));
+  border:1px solid rgba(0,229,255,.28);border-radius:var(--r);
+  padding:26px;margin-bottom:26px;position:relative;overflow:hidden;
+}
+.qbox::before{content:'INSTANT QUOTATION';position:absolute;top:14px;right:18px;font-size:.5rem;font-weight:800;letter-spacing:.25em;color:rgba(0,229,255,.2);text-transform:uppercase}
+.qtitle{font-size:.8rem;font-weight:800;letter-spacing:.15em;color:var(--cyan);margin-bottom:18px;display:flex;align-items:center;gap:10px;text-transform:uppercase}
+.qtitle::after{content:'';flex:1;height:1px;background:rgba(0,229,255,.18)}
+.qline{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(0,229,255,.05);font-size:.78rem}
+.qline:last-child{border-bottom:none}
+.ql-label{color:var(--muted);font-weight:500}
+.ql-val{font-weight:800;color:var(--white);font-size:.75rem}
+.qtotal{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid rgba(0,229,255,.22)}
+.qtotal-label{font-size:.88rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.qtotal-val{font-size:1.5rem;font-weight:900;color:var(--cyan);text-shadow:0 0 22px rgba(0,229,255,.55)}
+.qnote{margin-top:13px;font-size:.68rem;font-weight:400;color:var(--muted);line-height:1.7;text-align:center}
+
+/* summary */
+.sum-row{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(0,229,255,.06);font-size:.8rem}
+.sum-row:last-child{border-bottom:none}
+.sum-ico{width:22px;flex-shrink:0;text-align:center;font-size:.9rem}
+.sum-key{font-weight:600;color:var(--muted);width:110px;flex-shrink:0}
+.sum-val{font-weight:600;color:var(--white)}
+
+/* ── BUTTONS ── */
+.btn-row{display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap;margin-top:26px}
+.btn{
+  font-family:var(--font);font-size:.75rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  padding:13px 28px;border-radius:8px;border:none;cursor:pointer;transition:var(--t);
+  display:inline-flex;align-items:center;gap:8px;text-decoration:none;
+}
+.btn-ghost{background:transparent;border:1px solid rgba(0,229,255,.28);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--cyan);color:var(--cyan)}
+.btn-primary{background:linear-gradient(135deg,var(--cyan),#0099cc);color:var(--navy);box-shadow:0 4px 22px rgba(0,229,255,.3)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,229,255,.5)}
+.btn-success{background:linear-gradient(135deg,var(--success),#00cc88);color:var(--navy);box-shadow:0 4px 22px rgba(0,255,179,.28)}
+.btn-success:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,255,179,.5)}
+@media(max-width:480px){.card{padding:22px 16px}.btn-row{justify-content:stretch}.btn{flex:1;justify-content:center}}
+
+/* ── SUCCESS ── */
+.success{text-align:center;padding:36px 16px;animation:fadeUp .55s ease both}
+.sico{width:76px;height:76px;border-radius:50%;background:rgba(0,255,179,.1);border:2px solid var(--success);display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 22px;box-shadow:0 0 36px rgba(0,255,179,.3);animation:pop .5s cubic-bezier(.68,-.55,.265,1.55) .2s both}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.s-title{font-size:1.5rem;font-weight:900;letter-spacing:.04em;color:var(--success);margin-bottom:10px}
+.s-msg{font-size:.82rem;font-weight:400;color:var(--muted);line-height:1.8;max-width:400px;margin:0 auto 22px}
+.refcode{display:inline-block;font-size:.95rem;font-weight:900;letter-spacing:.2em;color:var(--cyan);background:rgba(0,229,255,.08);border:1px dashed rgba(0,229,255,.3);padding:10px 24px;border-radius:8px;margin-bottom:24px}
+
+/* banner */
+.info-banner{background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.16);border-radius:9px;padding:13px 17px;font-size:.75rem;font-weight:500;color:var(--cyan2);line-height:1.7;margin-bottom:22px;display:flex;gap:11px;align-items:flex-start}
+.ib-ico{font-size:1rem;flex-shrink:0;margin-top:2px}
+
+/* hidden */
+.hidden{display:none!important}
+
+/* ── FOOTER ── */
+footer{text-align:center;padding:30px 0 0;border-top:1px solid rgba(0,229,255,.07);font-size:.65rem;font-weight:600;letter-spacing:.12em;color:rgba(0,229,255,.22);text-transform:uppercase;margin-top:40px}
+footer a{color:var(--cyan2);text-decoration:none}
+footer a:hover{color:var(--cyan)}
+
+/* lka badge */
+.lka{display:inline-flex;align-items:center;gap:7px;background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.18);border-radius:100px;padding:5px 14px;font-size:.62rem;font-weight:700;letter-spacing:.1em;color:var(--cyan2);margin-bottom:16px}
+</style>
+</head>
+<body>
+
+<div class="pts" id="pts"></div>
+
+<div class="wrap">
+  <header>
+    <div class="first-badge">🇱🇰 Sri Lanka's First Instant Creative Quote System</div>
+    <div class="logo">ATHYAB ANJATH</div>
+    <div class="logo-sub">C R E A T O R</div>
+    <div class="tagline">Capturing Moments. Creating Stories.</div>
+    <div class="divider"></div>
+  </header>
+
+  <!-- Steps -->
+  <div class="steps">
+    <div class="si active" id="si1"><div class="sc">01</div><div class="sl">Service</div></div>
+    <div class="scon"></div>
+    <div class="si" id="si2"><div class="sc">02</div><div class="sl">Details</div></div>
+    <div class="scon"></div>
+    <div class="si" id="si3"><div class="sc">03</div><div class="sl">Quote</div></div>
+    <div class="scon"></div>
+    <div class="si" id="si4"><div class="sc">04</div><div class="sl">Confirm</div></div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="card" id="step1">
+    <div class="ct">Choose Your Service</div>
+    <div class="cd">Select a service — your quotation is calculated instantly.</div>
+    <div class="svc-grid">
+      <div class="svc" data-svc="Photography" data-base="15000" onclick="pickSvc(this)">
+        <div class="svc-chk">✓</div>
+        <div class="svc-ico">📸</div>
+        <div class="svc-name">Photography</div>
+        <div class="svc-price">From LKR 15,000</div>
+      </div>
+      <div class="svc" data-svc="Videography" data-base="25000" onclick="pickSvc(this)">
+        <div class="svc-chk">✓</div>
+        <div class="svc-ico">🎬</div>
+        <div class="svc-name">Videography</div>
+        <div class="svc-price">From LKR 25,000</div>
+      </div>
+      <div class="svc" data-svc="Social Media Content" data-base="18000" onclick="pickSvc(this)">
+        <div class="svc-chk">✓</div>
+        <div class="svc-ico">📱</div>
+        <div class="svc-name">Social Media Content</div>
+        <div class="svc-price">From LKR 18,000</div>
+      </div>
+      <div class="svc" data-svc="Logo & Branding Design" data-base="20000" onclick="pickSvc(this)">
+        <div class="svc-chk">✓</div>
+        <div class="svc-ico">🎨</div>
+        <div class="svc-name">Logo & Branding</div>
+        <div class="svc-price">From LKR 20,000</div>
+      </div>
+    </div>
+    <div id="svcErr" style="font-size:.68rem;color:var(--danger);margin-top:10px;display:none">⚠ Please select a service to continue.</div>
+
+    <div class="ct" style="margin-top:30px">Add-On Services <span style="font-size:.68rem;font-weight:400;color:var(--muted);text-transform:none">(optional)</span></div>
+    <div class="cd">Enhance your package.</div>
+    <div class="addon-list">
+      <div class="addon" data-name="Drone Aerial Shots" data-price="8000" onclick="toggleAddon(this)">
+        <div class="addon-box">✓</div>
+        <div class="addon-info">
+          <div class="addon-name">🚁 Drone Aerial Shots</div>
+          <div class="addon-desc">Professional aerial footage & photography</div>
+        </div>
+        <div class="addon-price">+LKR 8,000</div>
+      </div>
+      <div class="addon" data-name="Express Delivery (48hrs)" data-price="5000" onclick="toggleAddon(this)">
+        <div class="addon-box">✓</div>
+        <div class="addon-info">
+          <div class="addon-name">⚡ Express Delivery (48hrs)</div>
+          <div class="addon-desc">Rush editing & delivery within 48 hours</div>
+        </div>
+        <div class="addon-price">+LKR 5,000</div>
+      </div>
+      <div class="addon" data-name="Instagram Reels Edit" data-price="6000" onclick="toggleAddon(this)">
+        <div class="addon-box">✓</div>
+        <div class="addon-info">
+          <div class="addon-name">🎞️ Instagram Reels Edit</div>
+          <div class="addon-desc">Dedicated vertical Reels cuts & stories</div>
+        </div>
+        <div class="addon-price">+LKR 6,000</div>
+      </div>
+      <div class="addon" data-name="Print-Ready Files" data-price="4500" onclick="toggleAddon(this)">
+        <div class="addon-box">✓</div>
+        <div class="addon-info">
+          <div class="addon-name">🖨️ Print-Ready Files</div>
+          <div class="addon-desc">High-res files optimised for printing</div>
+        </div>
+        <div class="addon-price">+LKR 4,500</div>
+      </div>
+    </div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="go(2)">Next: Event Details →</button></div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="card hidden" id="step2">
+    <div class="ct">Your Details</div>
+    <div class="cd">Tell us about yourself and your event.</div>
+    <div class="frow">
+      <div class="fg" id="fg-name">
+        <label>Full Name <span class="req">*</span></label>
+        <input type="text" id="f-name" placeholder="Your full name"/>
+        <div class="err-txt">Please enter your name.</div>
+      </div>
+      <div class="fg" id="fg-phone">
+        <label>Mobile Number <span class="req">*</span></label>
+        <input type="tel" id="f-phone" placeholder="+94 7X XXX XXXX"/>
+        <div class="err-txt">Enter a valid phone number.</div>
+      </div>
+    </div>
+    <div class="fg" id="fg-email">
+      <label>Email Address <span class="req">*</span></label>
+      <input type="email" id="f-email" placeholder="you@example.com"/>
+      <div class="err-txt">Enter a valid email address.</div>
+    </div>
+    <div class="frow">
+      <div class="fg" id="fg-date">
+        <label>Event / Project Date <span class="req">*</span></label>
+        <input type="date" id="f-date"/>
+        <div class="err-txt">Please select a date.</div>
+      </div>
+      <div class="fg">
+        <label>Location / City</label>
+        <input type="text" id="f-loc" placeholder="Colombo, Sri Lanka"/>
+      </div>
+    </div>
+    <div class="fg" id="fg-type">
+      <label>Event Type <span class="req">*</span></label>
+      <select id="f-type">
+        <option value="">— Select event type —</option>
+        <option>Wedding</option>
+        <option>Corporate Event</option>
+        <option>Product Launch</option>
+        <option>Birthday / Celebration</option>
+        <option>Engagement</option>
+        <option>Brand Campaign</option>
+        <option>Fashion / Editorial</option>
+        <option>Music / Concert</option>
+        <option>Sports Event</option>
+        <option>Other</option>
+      </select>
+      <div class="err-txt">Please select an event type.</div>
+    </div>
+    <div class="fg">
+      <label>Coverage Duration</label>
+      <div class="dur-wrap">
+        <button class="dur" data-hrs="2" data-mult="1" onclick="pickDur(this)">2 Hours</button>
+        <button class="dur" data-hrs="4" data-mult="1.5" onclick="pickDur(this)">4 Hours</button>
+        <button class="dur" data-hrs="6" data-mult="2" onclick="pickDur(this)">6 Hours</button>
+        <button class="dur" data-hrs="8" data-mult="2.6" onclick="pickDur(this)">Full Day</button>
+        <button class="dur" data-hrs="0" data-mult="1" onclick="pickDur(this)">Package</button>
+      </div>
+    </div>
+    <div class="fg">
+      <label id="slLbl">Number of Guests / Subjects</label>
+      <div class="slider-wrap">
+        <input type="range" min="1" max="500" value="50" id="gSlider" oninput="updSlider()"/>
+        <div class="slider-val" id="slVal">50 guests</div>
+        <div class="slider-labels"><span>1</span><span>500</span></div>
+      </div>
+    </div>
+    <div class="fg">
+      <label>Additional Notes / Special Requests</label>
+      <textarea id="f-notes" placeholder="Mood board links, special requirements, preferences..."></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="go(1)">← Back</button>
+      <button class="btn btn-primary" onclick="go(3)">Get My Quote →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="card hidden" id="step3">
+    <div class="lka">🇱🇰 First Instant Creative Quotation in Sri Lanka</div>
+    <div class="ct">Your Instant Quotation</div>
+    <div class="cd">Calculated in real-time based on your selections.</div>
+    <div class="qbox">
+      <div class="qtitle">Price Breakdown</div>
+      <div id="qLines"></div>
+      <div class="qtotal">
+        <div class="qtotal-label">Total Estimate</div>
+        <div class="qtotal-val" id="qTotal">LKR 0</div>
+      </div>
+      <div class="qnote">Indicative quote — final pricing confirmed before shoot. A <strong>30% advance</strong> secures your date. All prices in Sri Lankan Rupees (LKR).</div>
+    </div>
+    <div class="info-banner">
+      <div class="ib-ico">📅</div>
+      <div>Limited slots per month. Once confirmed, your date is reserved exclusively for you. Athyab Anjath Creator operates across all of Sri Lanka.</div>
+    </div>
+    <div class="ct" style="margin-bottom:14px">Booking Summary</div>
+    <div id="sumBlock"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="go(2)">← Edit</button>
+      <button class="btn btn-success" onclick="submitBooking()">✓ Confirm & Submit Booking</button>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="card hidden" id="step4">
+    <div class="success">
+      <div class="sico">✓</div>
+      <div class="s-title">Booking Submitted!</div>
+      <div class="s-msg">Thank you for choosing <strong>Athyab Anjath Creator</strong>. Your request has been received and saved. You'll hear back within <strong>2 hours</strong>.</div>
+      <div class="refcode" id="refCode">REF-AA-000000</div>
+      <div style="font-size:.7rem;font-weight:500;color:var(--muted);margin-bottom:24px">Save this reference number for follow-up queries.</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+        <a href="https://athyabanjath.creator" class="btn btn-ghost" target="_blank">Visit Website</a>
+        <button class="btn btn-primary" onclick="resetAll()">New Request</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2025 Athyab Anjath Creator &nbsp;·&nbsp; <a href="https://athyabanjath.creator" target="_blank">athyabanjath.creator</a></p>
+    <p style="margin-top:6px">Photography · Videography · Social Media · Branding &nbsp;·&nbsp; All across Sri Lanka 🇱🇰</p>
+  </footer>
+</div>
+
+<script>
+// Particles
+(function(){
+  const c=document.getElementById('pts');
+  for(let i=0;i<26;i++){
+    const p=document.createElement('div');p.className='pt';
+    const s=Math.random()*2.5+.8;
+    p.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;animation-duration:${Math.random()*16+10}s;animation-delay:${Math.random()*14}s`;
+    c.appendChild(p);
+  }
+})();
+
+// State
+const S={svc:'',base:0,addons:[],addonTotal:0,durHrs:0,durMult:1,guests:50,name:'',phone:'',email:'',date:'',loc:'',type:'',notes:''};
+
+function pickSvc(el){
+  document.querySelectorAll('.svc').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel');
+  S.svc=el.dataset.svc; S.base=parseInt(el.dataset.base);
+  document.getElementById('svcErr').style.display='none';
+  // update slider label for branding
+  document.getElementById('slLbl').textContent=S.svc.includes('Branding')?'Number of Deliverables':'Number of Guests / Subjects';
+  updSlider();
+}
+
+function toggleAddon(el){
+  const name=el.dataset.name,price=parseInt(el.dataset.price);
+  if(el.classList.contains('sel')){
+    el.classList.remove('sel');
+    S.addons=S.addons.filter(a=>a.name!==name);
+    S.addonTotal-=price;
+  }else{
+    el.classList.add('sel');
+    S.addons.push({name,price});
+    S.addonTotal+=price;
+  }
+}
+
+function pickDur(el){
+  document.querySelectorAll('.dur').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel');
+  S.durHrs=parseInt(el.dataset.hrs)||0;
+  S.durMult=parseFloat(el.dataset.mult)||1;
+}
+
+function updSlider(){
+  S.guests=parseInt(document.getElementById('gSlider').value);
+  document.getElementById('slVal').textContent=S.guests+(S.svc.includes('Branding')?' deliverables':' guests');
+}
+
+// Validation
+function validateStep1(){
+  if(!S.svc){document.getElementById('svcErr').style.display='block';return false}
+  return true;
+}
+function validateStep2(){
+  let ok=true;
+  const rules=[
+    {fid:'f-name',fg:'fg-name',test:v=>v.trim().length>1},
+    {fid:'f-phone',fg:'fg-phone',test:v=>/^[\d\s\+\-]{7,}$/.test(v.trim())},
+    {fid:'f-email',fg:'fg-email',test:v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())},
+    {fid:'f-date',fg:'fg-date',test:v=>v!==''},
+    {fid:'f-type',fg:'fg-type',test:v=>v!==''},
+  ];
+  rules.forEach(r=>{
+    const el=document.getElementById(r.fid),fg=document.getElementById(r.fg);
+    if(!r.test(el.value)){fg.classList.add('has-err');ok=false}
+    else fg.classList.remove('has-err');
+  });
+  if(ok){
+    S.name=document.getElementById('f-name').value.trim();
+    S.phone=document.getElementById('f-phone').value.trim();
+    S.email=document.getElementById('f-email').value.trim();
+    S.date=document.getElementById('f-date').value;
+    S.loc=document.getElementById('f-loc').value.trim();
+    S.type=document.getElementById('f-type').value;
+    S.notes=document.getElementById('f-notes').value.trim();
+    S.guests=parseInt(document.getElementById('gSlider').value);
+  }
+  return ok;
+}
+
+// Step navigation
+function go(n){
+  if(n===2&&!validateStep1())return;
+  if(n===3&&!validateStep2())return;
+  if(n===3)buildQuote();
+  [1,2,3,4].forEach(i=>{
+    document.getElementById('step'+i).classList.add('hidden');
+    const si=document.getElementById('si'+i);
+    si.classList.remove('active','done');
+    if(i<n)si.classList.add('done');
+    if(i===n)si.classList.add('active');
+  });
+  document.getElementById('step'+n).classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+const fmt=n=>n.toLocaleString('en-LK');
+function fmtDate(d){
+  if(!d)return'—';
+  const [y,m,day]=d.split('-');
+  return`${parseInt(day)} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m)-1]} ${y}`;
+}
+
+function buildQuote(){
+  let sub=Math.round(S.base*S.durMult);
+  if(S.guests>100)sub=Math.round(sub*(1+Math.floor((S.guests-100)/100)*0.08));
+  const grand=sub+S.addonTotal;
+  const advance=Math.round(grand*0.3);
+  const lines=document.getElementById('qLines');
+  lines.innerHTML='';
+  const add=(label,val)=>{
+    const d=document.createElement('div');d.className='qline';
+    d.innerHTML=`<span class="ql-label">${label}</span><span class="ql-val">${val}</span>`;
+    lines.appendChild(d);
+  };
+  add(S.svc+' (Base Rate)','LKR '+fmt(S.base));
+  if(S.durHrs>0)add('Duration Multiplier ('+S.durHrs+'hrs)','×'+S.durMult);
+  if(S.guests>100)add('Volume Adjustment ('+S.guests+' guests)','+'+Math.round((sub-S.base*S.durMult>0?sub-Math.round(S.base*S.durMult):0)).toLocaleString());
+  S.addons.forEach(a=>add('+ '+a.name,'LKR '+fmt(a.price)));
+  add('30% Advance to Secure Date','LKR '+fmt(advance));
+  document.getElementById('qTotal').textContent='LKR '+fmt(grand);
+
+  // summary
+  const sb=document.getElementById('sumBlock');
+  sb.innerHTML='';
+  const rows=[
+    ['👤','Name',S.name],['📱','Mobile',S.phone],['✉️','Email',S.email],
+    ['📅','Date',fmtDate(S.date)],['📍','Location',S.loc||'Sri Lanka'],
+    ['🎭','Event Type',S.type],['🎯','Service',S.svc],
+    ['⏱','Duration',S.durHrs>0?S.durHrs+'hr coverage':'Package Deal'],
+    ['👥','Guests/Subjects',S.guests],
+    ...(S.addons.length?[['➕','Add-Ons',S.addons.map(a=>a.name).join(', ')]]:  []),
+    ...(S.notes?[['📝','Notes',S.notes]]:[])
+  ];
+  rows.forEach(([ico,key,val])=>{
+    sb.innerHTML+=`<div class="sum-row"><div class="sum-ico">${ico}</div><div class="sum-key">${key}</div><div class="sum-val">${val}</div></div>`;
+  });
+
+  // Store quote for submission
+  S._grand=grand; S._advance=advance;
+}
+
+async function submitBooking(){
+  const ref='REF-AA-'+Math.floor(100000+Math.random()*900000);
+  const payload={
+    ref, service:S.svc, addons:S.addons.map(a=>a.name),
+    name:S.name, phone:S.phone, email:S.email,
+    eventDate:S.date, location:S.loc, eventType:S.type,
+    duration:S.durHrs>0?S.durHrs+'hrs':'Package',
+    guests:S.guests, notes:S.notes,
+    totalLKR:S._grand, advanceLKR:S._advance,
+    status:'New', submittedAt: new Date().toISOString()
+  };
+
+  // Save to Firebase if ready
+  if(window.__firebaseReady){
+    try{
+      await window.__addDoc(window.__col,{...payload,submittedAt:window.__serverTimestamp()});
+    }catch(e){console.warn('Firebase write error:',e)}
+  }
+
+  document.getElementById('refCode').textContent=ref;
+  go(4);
+}
+
+function resetAll(){
+  S.svc='';S.base=0;S.addons=[];S.addonTotal=0;S.durHrs=0;S.durMult=1;S.guests=50;
+  document.querySelectorAll('.svc,.addon,.dur').forEach(e=>e.classList.remove('sel'));
+  document.querySelectorAll('input,select,textarea').forEach(e=>e.value='');
+  document.getElementById('gSlider').value=50;
+  document.getElementById('slVal').textContent='50 guests';
+  go(1);
+}
+
+document.getElementById('f-date').min=new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>
